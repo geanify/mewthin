@@ -21,7 +21,4 @@ const app = new Elysia()
     body: new Uint8Array(await request.arrayBuffer()),
   })
 })
-
-
-
 .listen(3000)
