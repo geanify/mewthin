@@ -63,5 +63,9 @@ export default class AttackSystem {
         }
       }
     });
+    // Force HP bars to update in real time
+    if (this.scene.drawPlayers) {
+      this.scene.drawPlayers();
+    }
   }
 } 

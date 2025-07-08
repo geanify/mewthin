@@ -22,7 +22,7 @@ export const BASE_STATS: PlayerStats = {
   intelligence: 10,
   dexterity: 10,
   movementSpeed: 2,
-  attackSpeed: 1,
+  attackSpeed: 3,
   castingSpeed: 1,
   baseHP: 100,
   baseMana: 50,
