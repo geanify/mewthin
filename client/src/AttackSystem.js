@@ -52,6 +52,14 @@ export default class AttackSystem {
         // Apply damage (for now, just subtract 10 HP)
         if (entity.stats && typeof entity.stats.currentHealth === 'number') {
           entity.stats.currentHealth = Math.max(0, entity.stats.currentHealth - 10);
+          // Respawn enemy if HP is 0 or less
+          if (entity.isEnemy && entity.stats.currentHealth <= 0) {
+            // Random position within 800x600, keeping enemy size in bounds
+            entity.x = Math.floor(Math.random() * (800 - 20));
+            entity.y = Math.floor(Math.random() * (600 - 20));
+            // Restore health
+            entity.stats.currentHealth = entity.stats.baseHP || 100;
+          }
         }
       }
     });
