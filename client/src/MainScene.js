@@ -40,25 +40,36 @@ export default class MainScene extends Scene {
   }
 
   drawPlayers() {
-    if (this.playerGraphics) this.playerGraphics.clear();
-    else this.playerGraphics = this.add.graphics();
+    if (!this.playerGraphics) {
+      this.playerGraphics = this.add.graphics();
+    }
     this.playerGraphics.clear();
-    // Draw all entities
-    const allPlayers = this.entityManager.getAllEntities();
-    allPlayers.forEach((player) => {
-      if (player.isEnemy) {
-        // Enemies: small red squares
+
+    const allEntities = this.entityManager.getAllEntities();
+    allEntities.forEach((entity) => {
+      // Draw entity rectangle
+      if (entity.isEnemy) {
         this.playerGraphics.fillStyle(0xff0000, 1);
-        this.playerGraphics.fillRect(player.x, player.y, 20, 20);
-      } else if (player.id === this.playerId) {
-        // Local player: green
+        this.playerGraphics.fillRect(entity.x, entity.y, 20, 20);
+      } else if (entity.id === this.playerId) {
         this.playerGraphics.fillStyle(0x00ff00, 1);
-        this.playerGraphics.fillRect(player.x, player.y, 32, 32);
+        this.playerGraphics.fillRect(entity.x, entity.y, 32, 32);
       } else {
-        // Other players: blue
         this.playerGraphics.fillStyle(0x0000ff, 1);
-        this.playerGraphics.fillRect(player.x, player.y, 32, 32);
+        this.playerGraphics.fillRect(entity.x, entity.y, 32, 32);
       }
+
+      // Draw HP bar above the entity
+      const width = entity.isEnemy ? 20 : 32;
+      const barHeight = 4;
+      const barY = entity.y - 8;
+      const maxHP = entity.stats?.baseHP || 100;
+      const curHP = entity.stats?.currentHealth ?? maxHP;
+      const hpRatio = Math.max(0, Math.min(1, curHP / maxHP));
+      this.playerGraphics.fillStyle(0x222222, 1);
+      this.playerGraphics.fillRect(entity.x, barY, width, barHeight);
+      this.playerGraphics.fillStyle(0x00ff00, 1);
+      this.playerGraphics.fillRect(entity.x, barY, width * hpRatio, barHeight);
     });
   }
 } 
