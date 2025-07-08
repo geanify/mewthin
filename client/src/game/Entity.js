@@ -27,4 +27,14 @@ export default class Entity {
       this.ai.update(this, scene);
     }
   }
+
+  moveTowards(targetX, targetY, speed) {
+    const dx = targetX - this.x;
+    const dy = targetY - this.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1e-2) return; // Already at target
+    const step = Math.min(speed, dist);
+    this.x += (dx / dist) * step;
+    this.y += (dy / dist) * step;
+  }
 } 

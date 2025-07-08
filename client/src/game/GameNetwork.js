@@ -2,6 +2,7 @@ import socket from './socket.js';
 import Entity from './Entity.js';
 import Player from './Player.js';
 import Enemy from './Enemy.js';
+import AggressiveEnemy from './AggressiveEnemy.js';
 
 export default class GameNetwork {
   constructor(entityManager, setPlayerIdCb, drawEntitiesCb, scene) {
@@ -31,6 +32,8 @@ export default class GameNetwork {
         if (!entity) {
           if (data.isPlayer) {
             entity = new Player(id, data.x, data.y, data.stats, this.scene);
+          } else if (data.type === 'aggressiveEnemy' || data.isAggressiveEnemy) {
+            entity = new AggressiveEnemy(id, data.x, data.y, data.stats);
           } else if (data.isEnemy) {
             entity = new Enemy(id, data.x, data.y, data.stats);
           } else {
@@ -62,6 +65,8 @@ export default class GameNetwork {
         // Add new entity (Player or Enemy)
         if (data.isPlayer) {
           entity = new Player(data.id, data.x, data.y, data.stats, this.scene);
+        } else if (data.type === 'aggressiveEnemy' || data.isAggressiveEnemy) {
+          entity = new AggressiveEnemy(data.id, data.x, data.y, data.stats);
         } else if (data.isEnemy) {
           entity = new Enemy(data.id, data.x, data.y, data.stats);
         } else {

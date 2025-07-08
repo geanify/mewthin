@@ -11,18 +11,30 @@ const io = new Server(undefined, {
 
 // Player and enemy state
 type PlayerState = { x: number, y: number, stats: PlayerStats };
-type EnemyState = { id: string, x: number, y: number, stats: PlayerStats };
+type EnemyState = { id: string, x: number, y: number, stats: PlayerStats, type?: string, isAggressiveEnemy?: boolean };
 const players: Record<string, PlayerState> = {};
 const enemies: Record<string, EnemyState> = {};
 
-// Spawn 5 enemies with placeholder stats
-for (let i = 0; i < 5; i++) {
+// Spawn 4 regular enemies
+for (let i = 0; i < 4; i++) {
   const id = `enemy_${i}`;
   enemies[id] = {
     id,
     x: 200 + i * 80,
     y: 300 + (i % 2) * 60,
     stats: { ...BASE_STATS }
+  };
+}
+// Spawn 5 AggressiveEnemies at random positions
+for (let i = 0; i < 5; i++) {
+  const id = `aggressive_enemy_${i}`;
+  enemies[id] = {
+    id,
+    x: Math.floor(Math.random() * 800),
+    y: Math.floor(Math.random() * 600),
+    stats: { ...BASE_STATS, baseHP: 150, currentHealth: 150 },
+    type: 'aggressiveEnemy',
+    isAggressiveEnemy: true
   };
 }
 
@@ -37,7 +49,12 @@ io.on('connection', socket => {
       entities[id] = { ...data, isPlayer: true, isEnemy: false };
     });
     Object.entries(enemies).forEach(([id, data]) => {
-      entities[id] = { ...data, isPlayer: false, isEnemy: true };
+      // Mark AggressiveEnemy with type and flag
+      if (data.type === 'aggressiveEnemy' || data.isAggressiveEnemy) {
+        entities[id] = { ...data, isPlayer: false, isEnemy: true, type: 'aggressiveEnemy', isAggressiveEnemy: true };
+      } else {
+        entities[id] = { ...data, isPlayer: false, isEnemy: true };
+      }
     });
     return entities;
   };
