@@ -1,77 +1,83 @@
 import socket from './socket.js';
+import Entity from './Entity.js';
+import Player from './Player.js';
+import Enemy from './Enemy.js';
 
 export default class GameNetwork {
-  constructor(entityManager, Player, Enemy, setPlayerIdCb, drawPlayersCb) {
+  constructor(entityManager, setPlayerIdCb, drawEntitiesCb, scene) {
     this.entityManager = entityManager;
-    this.Player = Player;
-    this.Enemy = Enemy;
     this.setPlayerId = setPlayerIdCb;
-    this.drawPlayers = drawPlayersCb;
+    this.drawEntities = drawEntitiesCb;
+    this.scene = scene;
 
     // Remove previous socket listeners to avoid duplicates on hot reload
     socket.off('currentState');
-    socket.off('playerJoined');
-    socket.off('playerMoved');
-    socket.off('playerLeft');
+    socket.off('entityUpdated');
+    socket.off('entityMoved');
+    socket.off('entityLeft');
 
-    socket.on('currentState', ({ players, enemies }) => {
-      // Remove all non-enemy entities
+    socket.on('currentState', ({ entities, playerId }) => {
+      // Remove all entities not in the new state
+      const currentIds = new Set(Object.keys(entities));
       this.entityManager.getAllEntities().forEach(entity => {
-        if (!entity.isEnemy) {
+        if (!currentIds.has(entity.id)) {
           this.entityManager.removeEntity(entity.id);
         }
       });
 
-      // Add or update players from the server
-      Object.entries(players).forEach(([id, data]) => {
-        let player = this.entityManager.getEntity(id);
-        if (player && !player.isEnemy) {
-          player.updatePosition(data.x, data.y);
-          player.updateStats(data.stats);
-        } else if (!player) {
-          this.entityManager.addEntity(new this.Player(id, data.x, data.y, data.stats));
-        }
-      });
-
-      // Add or update enemies from the server
-      Object.entries(enemies).forEach(([id, data]) => {
-        let enemy = this.entityManager.getEntity(id);
-        if (!enemy) {
-          this.entityManager.addEntity(new this.Enemy(id, data.x, data.y, data.stats));
+      // Add or update entities from the server
+      Object.entries(entities).forEach(([id, data]) => {
+        let entity = this.entityManager.getEntity(id);
+        if (!entity) {
+          if (data.isPlayer) {
+            entity = new Player(id, data.x, data.y, data.stats, this.scene);
+          } else if (data.isEnemy) {
+            entity = new Enemy(id, data.x, data.y, data.stats);
+          } else {
+            entity = new Entity(id, data.x, data.y, data.stats, null);
+          }
+          this.entityManager.addEntity(entity);
         } else {
-          enemy.x = data.x;
-          enemy.y = data.y;
-          enemy.stats = data.stats;
+          entity.updatePosition(data.x, data.y);
+          entity.updateStats(data.stats);
         }
       });
 
-      this.setPlayerId(socket.id);
-      this.drawPlayers();
-      // Log stats for debugging
-      this.entityManager.getAllEntities().forEach((entity) => {
-        if (!entity.isEnemy) {
-          console.log(`Player ${entity.id} stats:`, entity.stats);
+      this.setPlayerId(playerId);
+      this.drawEntities();
+    });
+
+    socket.on('entityMoved', ({ id, x, y, stats }) => {
+      let entity = this.entityManager.getEntity(id);
+      if (entity) {
+        entity.updatePosition(x, y);
+        entity.updateStats(stats);
+        this.drawEntities();
+      }
+    });
+
+    socket.on('entityUpdated', (data) => {
+      let entity = this.entityManager.getEntity(data.id);
+      if (!entity) {
+        // Add new entity (Player or Enemy)
+        if (data.isPlayer) {
+          entity = new Player(data.id, data.x, data.y, data.stats, this.scene);
+        } else if (data.isEnemy) {
+          entity = new Enemy(data.id, data.x, data.y, data.stats);
+        } else {
+          entity = new Entity(data.id, data.x, data.y, data.stats, null);
         }
-      });
+        this.entityManager.addEntity(entity);
+      } else {
+        entity.updatePosition(data.x, data.y);
+        entity.updateStats(data.stats);
+      }
+      this.drawEntities();
     });
 
-    socket.on('playerMoved', ({ id, x, y, stats }) => {
-      let player = this.entityManager.getEntity(id);
-      if (player && !player.isEnemy) {
-        player.updatePosition(x, y);
-        player.updateStats(stats);
-        this.drawPlayers();
-      }
-    });
-
-    socket.on('enemyUpdated', ({ id, x, y, stats }) => {
-      let enemy = this.entityManager.getEntity(id);
-      if (enemy && enemy.isEnemy) {
-        enemy.x = x;
-        enemy.y = y;
-        enemy.stats = stats;
-        this.drawPlayers();
-      }
+    socket.on('entityLeft', (id) => {
+      this.entityManager.removeEntity(id);
+      this.drawEntities();
     });
   }
 } 

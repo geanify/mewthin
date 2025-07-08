@@ -19,10 +19,12 @@ export default class AttackSystem {
     this.drawAttackCircle(player);
 
     // Handle attack input (spacebar)
-    const space = this.scene.input.keyboard.addKey('SPACE');
-    if (space.isDown && time - this.lastAttackTime > this.attackCooldown) {
-      this.lastAttackTime = time;
-      this.performAttack(player);
+    if (player.isPlayer && player.ai && player.ai.cursors) {
+      const space = this.scene.input.keyboard.addKey('SPACE');
+      if (space.isDown && time - this.lastAttackTime > this.attackCooldown) {
+        this.lastAttackTime = time;
+        this.performAttack(player);
+      }
     }
   }
 
@@ -53,13 +55,13 @@ export default class AttackSystem {
       if (dist <= playerRadius + enemyRadius && entity.isEnemy) {
         // Emit attack to server
         if (typeof window !== 'undefined' && window.socket) {
-          window.socket.emit('attackEnemy', { id: entity.id, damage: 10 });
+          window.socket.emit('attackEntity', { id: entity.id, damage: 10 });
         }
       }
     });
     // Force HP bars to update in real time
-    if (this.scene.drawPlayers) {
-      this.scene.drawPlayers();
+    if (this.scene.drawEntities) {
+      this.scene.drawEntities();
     }
   }
 } 

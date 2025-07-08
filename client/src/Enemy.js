@@ -1,9 +1,14 @@
-export default class Enemy {
+import Entity from './Entity.js';
+
+class EnemyAI {
+  update(entity, scene) {
+    // Placeholder: implement enemy AI logic here
+    // Example: move randomly or towards player
+  }
+}
+
+export default class Enemy extends Entity {
   constructor(id, x, y, stats) {
-    this.id = id;
-    this.x = x;
-    this.y = y;
-    this.stats = stats || {};
-    this.isEnemy = true;
+    super(id, x, y, stats, new EnemyAI(), false, true);
   }
 } 

@@ -27,13 +27,12 @@ export default class MainScene extends Scene {
     // Use GameNetwork to handle all socket/game state logic
     this.network = new GameNetwork(
       this.entityManager,
-      Player,
-      Enemy,
       (id) => {
         this.playerId = id;
         if (typeof window !== 'undefined') window.playerId = id;
       },
-      () => this.drawPlayers()
+      () => this.drawEntities(),
+      this
     );
 
     this.attackSystem = new AttackSystem(this, this.entityManager, () => this.playerId);
@@ -70,7 +69,7 @@ export default class MainScene extends Scene {
     }
   }
 
-  drawPlayers() {
+  drawEntities() {
     if (!this.playerGraphics) {
       this.playerGraphics = this.add.graphics();
     }
