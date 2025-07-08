@@ -1,21 +1,15 @@
-import type { PlayerStats } from './playerStats';
 import type { Server } from 'socket.io';
+import type { PlayerState, EnemyState } from '../types';
 
-export type EnemyState = { id: string, x: number, y: number, stats: PlayerStats, type?: string, isAggressiveEnemy?: boolean };
+const AGGRO_RANGE = 200;
+const ATTACK_COOLDOWN = 1000;
 
-const AGGRO_RANGE = 200; // pixels
-const ATTACK_COOLDOWN = 1000; // ms
-
-export function handleAggressiveEnemies(
-  enemies: Record<string, EnemyState>,
-  players: Record<string, PlayerStats>,
-  io: Server,
-  lastEnemyAttack: Record<string, number>
-) {
+export function handleEnemyAI(state: { enemies: Record<string, EnemyState>, players: Record<string, PlayerState>, lastEnemyAttack: Record<string, number> }, io: Server) {
+  const { enemies, players, lastEnemyAttack } = state;
   Object.values(enemies).forEach(enemy => {
     if (enemy.type === 'aggressiveEnemy' || enemy.isAggressiveEnemy) {
       let nearestId: string | null = null;
-      let nearest: PlayerStats | null = null;
+      let nearest: PlayerState | null = null;
       let minDist = Infinity;
       Object.entries(players).forEach(([pid, player]) => {
         const dx = (player.x + 16) - (enemy.x + 10);

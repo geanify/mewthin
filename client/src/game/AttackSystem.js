@@ -55,7 +55,7 @@ export default class AttackSystem {
       if (dist <= playerRadius + enemyRadius && entity.isEnemy) {
         // Emit attack to server
         if (typeof window !== 'undefined' && window.socket) {
-          window.socket.emit('attackEntity', { id: entity.id, damage: 10 });
+          window.socket.emit('action', { type: 'ATTACK_ENTITY', payload: { id: entity.id, damage: 10 } });
         }
       }
     });
