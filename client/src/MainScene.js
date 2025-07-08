@@ -5,6 +5,7 @@ import EntityManager from './EntityManager.js';
 import Enemy from './Enemy.js';
 import socket from './socket.js'
 import GameNetwork from './GameNetwork.js';
+import AttackSystem from './AttackSystem.js';
 
 
 export default class MainScene extends Scene {
@@ -32,11 +33,17 @@ export default class MainScene extends Scene {
       },
       () => this.drawPlayers()
     );
+
+    this.attackSystem = new AttackSystem(this, this.entityManager, () => this.playerId);
   }
 
-  update() {
+  update(time) {
     // Let the entity manager update all entities (including the local player)
     this.entityManager.updateAll(this);
+    // Update attack system (handles attack logic, cooldown, and drawing range)
+    if (this.attackSystem) {
+      this.attackSystem.update(time);
+    }
   }
 
   drawPlayers() {
