@@ -6,6 +6,7 @@ import Enemy from './Enemy.js';
 import socket from './socket.js'
 import GameNetwork from './GameNetwork.js';
 import AttackSystem from './AttackSystem.js';
+import ClickToMove from './ClickToMove.js';
 
 
 export default class MainScene extends Scene {
@@ -35,6 +36,9 @@ export default class MainScene extends Scene {
     );
 
     this.attackSystem = new AttackSystem(this, this.entityManager, () => this.playerId);
+
+    // Add ClickToMove system
+    this.clickToMove = new ClickToMove(this, () => this.entityManager.getEntity(this.playerId));
   }
 
   update(time) {
@@ -43,6 +47,18 @@ export default class MainScene extends Scene {
     // Update attack system (handles attack logic, cooldown, and drawing range)
     if (this.attackSystem) {
       this.attackSystem.update(time);
+    }
+    // Cancel click-to-move if any movement key is pressed
+    if (this.clickToMove && this.inputHandler) {
+      const dir = this.inputHandler.getDirection();
+      const anyKey = dir.left || dir.right || dir.up || dir.down;
+      if (anyKey && this.clickToMove.target) {
+        this.clickToMove.cancel();
+      }
+    }
+    // Update click-to-move system
+    if (this.clickToMove) {
+      this.clickToMove.update();
     }
   }
 
