@@ -38,6 +38,73 @@ for (let i = 0; i < 5; i++) {
   };
 }
 
+// Store player input requests
+const playerInputs: Record<string, { x: number, y: number } | null> = {};
+
+// Set up server tickrate
+const TICK_RATE = 20; // ticks per second
+const AGGRO_RANGE = 200; // pixels
+const ATTACK_COOLDOWN = 1000; // ms
+const lastEnemyAttack: Record<string, number> = {};
+setInterval(() => {
+  // Process player movement
+  Object.entries(playerInputs).forEach(([id, input]) => {
+    if (input && players[id]) {
+      players[id].x = input.x;
+      players[id].y = input.y;
+      // Broadcast updated position
+      io.emit('entityMoved', { id, x: input.x, y: input.y, stats: players[id].stats, isPlayer: true, isEnemy: false });
+      playerInputs[id] = null; // Clear input after applying
+    }
+  });
+
+  // Server-side AggressiveEnemy AI
+  Object.values(enemies).forEach(enemy => {
+    if (enemy.type === 'aggressiveEnemy' || enemy.isAggressiveEnemy) {
+      // Find nearest player
+      let nearestId: string | null = null;
+      let nearest: PlayerState | null = null;
+      let minDist = Infinity;
+      Object.entries(players).forEach(([pid, player]) => {
+        const dx = (player.x + 16) - (enemy.x + 10);
+        const dy = (player.y + 16) - (enemy.y + 10);
+        const dist = Math.hypot(dx, dy);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = player;
+          nearestId = pid;
+        }
+      });
+      if (nearest && nearestId && minDist <= AGGRO_RANGE) {
+        // Move towards player if not in attack range
+        const attackRange = (enemy.stats.range || 1.5) * 32;
+        if (minDist > attackRange) {
+          const speed = enemy.stats.movementSpeed || 2;
+          const dx = nearest.x - enemy.x;
+          const dy = nearest.y - enemy.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 1e-2) {
+            const step = Math.min(speed, dist);
+            enemy.x += (dx / dist) * step;
+            enemy.y += (dy / dist) * step;
+            io.emit('entityMoved', { id: enemy.id, x: enemy.x, y: enemy.y, stats: enemy.stats, isPlayer: false, isEnemy: true, type: 'aggressiveEnemy', isAggressiveEnemy: true });
+          }
+        } else {
+          // Attack if cooldown elapsed
+          const now = Date.now();
+          if (!lastEnemyAttack[enemy.id] || now - lastEnemyAttack[enemy.id] > ATTACK_COOLDOWN) {
+            lastEnemyAttack[enemy.id] = now;
+            // Damage player
+            const damage = enemy.stats.baseAttack || 10;
+            nearest.stats.currentHealth = Math.max(0, (nearest.stats.currentHealth || nearest.stats.baseHP || 100) - damage);
+            io.emit('entityUpdated', { id: nearestId, x: nearest.x, y: nearest.y, stats: nearest.stats, isPlayer: true, isEnemy: false });
+          }
+        }
+      }
+    }
+  });
+}, 1000 / TICK_RATE);
+
 io.on('connection', socket => {
   // Assign initial position and stats
   players[socket.id] = { x: 100, y: 100, stats: { ...BASE_STATS } }
@@ -66,11 +133,8 @@ io.on('connection', socket => {
 
   // Handle movement
   socket.on('move', (data: { x: number, y: number }) => {
-    if (players[socket.id]) {
-      players[socket.id].x = data.x;
-      players[socket.id].y = data.y;
-      io.emit('entityMoved', { id: socket.id, x: data.x, y: data.y, stats: players[socket.id].stats, isPlayer: true, isEnemy: false });
-    }
+    // Store the input for processing in the tick loop
+    playerInputs[socket.id] = { x: data.x, y: data.y };
   })
 
   // Handle enemy attack
