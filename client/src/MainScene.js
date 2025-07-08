@@ -27,17 +27,23 @@ export default class MainScene extends Scene {
       this.players = players;
       this.playerId = socket.id;
       this.drawPlayers();
+      // Log stats for debugging
+      Object.entries(this.players).forEach(([id, player]) => {
+        console.log(`Player ${id} stats:`, player.stats);
+      });
     });
 
     socket.on('playerJoined', (player) => {
-      this.players[player.id] = { x: player.x, y: player.y };
+      this.players[player.id] = { x: player.x, y: player.y, stats: player.stats };
       this.drawPlayers();
+      console.log(`Player ${player.id} joined with stats:`, player.stats);
     });
 
     socket.on('playerMoved', (data) => {
       if (this.players[data.id]) {
         this.players[data.id].x = data.x;
         this.players[data.id].y = data.y;
+        if (data.stats) this.players[data.id].stats = data.stats;
         this.drawPlayers();
       }
     });
@@ -52,20 +58,21 @@ export default class MainScene extends Scene {
     if (!this.playerId || !this.players[this.playerId]) return;
     let moved = false;
     let player = this.players[this.playerId];
+    const speed = (player.stats && player.stats.movementSpeed) ? player.stats.movementSpeed : 2;
     if (this.cursors.left.isDown || this.wasd.left.isDown) {
-      player.x -= 2;
+      player.x -= speed;
       moved = true;
     }
     if (this.cursors.right.isDown || this.wasd.right.isDown) {
-      player.x += 2;
+      player.x += speed;
       moved = true;
     }
     if (this.cursors.up.isDown || this.wasd.up.isDown) {
-      player.y -= 2;
+      player.y -= speed;
       moved = true;
     }
     if (this.cursors.down.isDown || this.wasd.down.isDown) {
-      player.y += 2;
+      player.y += speed;
       moved = true;
     }
     if (moved) {
