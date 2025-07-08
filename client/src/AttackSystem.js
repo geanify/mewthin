@@ -39,27 +39,21 @@ export default class AttackSystem {
   }
 
   performAttack(player) {
-    const range = player.stats?.range || 1.5;
-    const radius = range * 32;
+    const playerRange = player.stats?.range || 1.5;
+    const playerRadius = playerRange * 32;
     const px = player.x + 16;
     const py = player.y + 16;
     this.entityManager.getAllEntities().forEach(entity => {
       if (entity.id === player.id) return;
       const ex = entity.x + (entity.isEnemy ? 10 : 16);
       const ey = entity.y + (entity.isEnemy ? 10 : 16);
+      const enemyRange = entity.stats?.range || 1.5;
+      const enemyRadius = enemyRange * 32;
       const dist = Math.hypot(px - ex, py - ey);
-      if (dist <= radius) {
-        // Apply damage (for now, just subtract 10 HP)
-        if (entity.stats && typeof entity.stats.currentHealth === 'number') {
-          entity.stats.currentHealth = Math.max(0, entity.stats.currentHealth - 10);
-          // Respawn enemy if HP is 0 or less
-          if (entity.isEnemy && entity.stats.currentHealth <= 0) {
-            // Random position within 800x600, keeping enemy size in bounds
-            entity.x = Math.floor(Math.random() * (800 - 20));
-            entity.y = Math.floor(Math.random() * (600 - 20));
-            // Restore health
-            entity.stats.currentHealth = entity.stats.baseHP || 100;
-          }
+      if (dist <= playerRadius + enemyRadius && entity.isEnemy) {
+        // Emit attack to server
+        if (typeof window !== 'undefined' && window.socket) {
+          window.socket.emit('attackEnemy', { id: entity.id, damage: 10 });
         }
       }
     });

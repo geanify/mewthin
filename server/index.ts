@@ -43,6 +43,21 @@ io.on('connection', socket => {
     }
   })
 
+  // Handle enemy attack
+  socket.on('attackEnemy', (data: { id: string, damage: number }) => {
+    const enemy = enemies[data.id];
+    if (enemy && typeof enemy.stats.currentHealth === 'number') {
+      enemy.stats.currentHealth = Math.max(0, enemy.stats.currentHealth - data.damage);
+      if (enemy.stats.currentHealth <= 0) {
+        // Respawn enemy at random position
+        enemy.x = Math.floor(Math.random() * (800 - 20));
+        enemy.y = Math.floor(Math.random() * (600 - 20));
+        enemy.stats.currentHealth = enemy.stats.baseHP || 100;
+      }
+      io.emit('enemyUpdated', { id: enemy.id, x: enemy.x, y: enemy.y, stats: enemy.stats });
+    }
+  });
+
   // Handle disconnect
   socket.on('disconnect', () => {
     delete players[socket.id]

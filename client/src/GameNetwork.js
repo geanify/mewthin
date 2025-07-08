@@ -54,5 +54,24 @@ export default class GameNetwork {
         }
       });
     });
+
+    socket.on('playerMoved', ({ id, x, y, stats }) => {
+      let player = this.entityManager.getEntity(id);
+      if (player && !player.isEnemy) {
+        player.updatePosition(x, y);
+        player.updateStats(stats);
+        this.drawPlayers();
+      }
+    });
+
+    socket.on('enemyUpdated', ({ id, x, y, stats }) => {
+      let enemy = this.entityManager.getEntity(id);
+      if (enemy && enemy.isEnemy) {
+        enemy.x = x;
+        enemy.y = y;
+        enemy.stats = stats;
+        this.drawPlayers();
+      }
+    });
   }
 } 
