@@ -7,6 +7,7 @@ import socket from './socket.js'
 import GameNetwork from './GameNetwork.js';
 import AttackSystem from './AttackSystem.js';
 import ClickToMove from './ClickToMove.js';
+import InventoryUI from './InventoryUI.js';
 
 
 export default class MainScene extends Scene {
@@ -40,8 +41,8 @@ export default class MainScene extends Scene {
     // Add ClickToMove system
     this.clickToMove = new ClickToMove(this, () => this.entityManager.getEntity(this.playerId));
 
-    // Inventory UI
-    this.inventoryText = this.add.text(10, 10, '', { font: '16px Arial', fill: '#fff' });
+    // Inventory UI (Diablo style)
+    this.inventoryUI = new InventoryUI(this, () => this.entityManager.getEntity(this.playerId));
   }
 
   update(time) {
@@ -64,15 +65,8 @@ export default class MainScene extends Scene {
       this.clickToMove.update();
     }
     // Update inventory UI
-    if (this.inventoryText && this.playerId) {
-      const player = this.entityManager.getEntity(this.playerId);
-      if (player && player.inventory) {
-        const items = player.inventory.getItems();
-        this.inventoryText.setText(
-          'Inventory:\n' +
-          items.map(item => `- ${item.name} (${item.slot})`).join('\n')
-        );
-      }
+    if (this.inventoryUI) {
+      this.inventoryUI.update();
     }
   }
 
