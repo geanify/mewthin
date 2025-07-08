@@ -32,4 +32,22 @@ export const BASE_STATS: PlayerStats = {
   baseMagicalAttack: 10,
   currentHealth: 100,
   range: 1.5,
+};
+
+export const STONE_ENEMY_STATS: PlayerStats = {
+  vitality: 50,
+  strength: 20,
+  intelligence: 5,
+  dexterity: 5,
+  movementSpeed: 1,
+  attackSpeed: 1,
+  castingSpeed: 1,
+  baseHP: 2000,
+  baseMana: 0,
+  baseAttack: 20,
+  baseDefense: 30,
+  baseMagicalDefense: 20,
+  baseMagicalAttack: 0,
+  currentHealth: 2000,
+  range: 1.5,
 }; 

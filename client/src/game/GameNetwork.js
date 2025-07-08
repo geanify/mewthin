@@ -32,6 +32,10 @@ export default class GameNetwork {
         if (!entity) {
           if (data.isPlayer) {
             entity = new Player(id, data.x, data.y, data.stats, this.scene);
+          } else if (data.type === 'stoneEnemy' || data.isStoneEnemy) {
+            entity = new Enemy(id, data.x, data.y, data.stats);
+            entity.color = 0xffff00; // Yellow for stone enemy
+            entity.isStoneEnemy = true;
           } else if (data.type === 'aggressiveEnemy' || data.isAggressiveEnemy) {
             entity = new AggressiveEnemy(id, data.x, data.y, data.stats);
           } else if (data.isEnemy) {

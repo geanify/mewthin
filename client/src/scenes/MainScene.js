@@ -76,7 +76,9 @@ export default class MainScene extends Scene {
     allEntities.forEach((entity) => {
       // Draw entity rectangle
       if (entity.isEnemy) {
-        if (entity.type === 'aggressiveEnemy' || entity.isAggressiveEnemy) {
+        if (entity.type === 'stoneEnemy' || entity.isStoneEnemy) {
+          this.playerGraphics.fillStyle(0xffff00, 1); // Yellow for Stone Enemy
+        } else if (entity.type === 'aggressiveEnemy' || entity.isAggressiveEnemy) {
           this.playerGraphics.fillStyle(0x800080, 1); // Purple for AggressiveEnemy
         } else {
           this.playerGraphics.fillStyle(0xff0000, 1); // Red for regular enemies

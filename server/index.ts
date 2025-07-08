@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { Server } from 'socket.io'
 import type { PlayerStats } from './playerStats'
-import { BASE_STATS } from './playerStats'
+import { BASE_STATS, STONE_ENEMY_STATS } from './playerStats'
 import { handleMoveAction } from './actions/movement'
 import { handleAttackAction } from './actions/attack'
 import { handleEnemyAI } from './actions/enemy'
@@ -14,7 +14,7 @@ const io = new Server(undefined, {
 
 // Define PlayerState and EnemyState inline since types.ts does not exist
 type PlayerState = { x: number, y: number, stats: PlayerStats }
-type EnemyState = { id: string, x: number, y: number, stats: PlayerStats, type?: string, isAggressiveEnemy?: boolean }
+type EnemyState = { id: string, x: number, y: number, stats: PlayerStats, type?: string, isAggressiveEnemy?: boolean, isStoneEnemy?: boolean, lastSplitPercent?: number }
 
 const state = {
   players: {} as Record<string, PlayerState>,
@@ -44,6 +44,18 @@ for (let i = 0; i < 5; i++) {
     isAggressiveEnemy: true
   }
 }
+
+// Spawn 1 Stone Enemy
+const stoneId = 'stone_enemy_1';
+state.enemies[stoneId] = {
+  id: stoneId,
+  x: 400,
+  y: 200,
+  stats: { ...STONE_ENEMY_STATS },
+  type: 'stoneEnemy',
+  isStoneEnemy: true,
+  lastSplitPercent: 100,
+};
 
 const TICK_RATE = 20
 setInterval(() => {
