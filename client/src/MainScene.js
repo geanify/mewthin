@@ -63,18 +63,22 @@ export default class MainScene extends Scene {
     if (this.playerGraphics) this.playerGraphics.clear();
     else this.playerGraphics = this.add.graphics();
     this.playerGraphics.clear();
-    // Draw all non-local players as gray rectangles
-    this.entityManager.getAllEntities().forEach((player) => {
-      if (player.id !== this.playerId) {
-        this.playerGraphics.fillStyle(0x888888, 1);
+    // Draw all entities
+    const allPlayers = this.entityManager.getAllEntities();
+    allPlayers.forEach((player) => {
+      if (player.isEnemy) {
+        // Enemies: small red squares
+        this.playerGraphics.fillStyle(0xff0000, 1);
+        this.playerGraphics.fillRect(player.x, player.y, 20, 20);
+      } else if (player.id === this.playerId) {
+        // Local player: green
+        this.playerGraphics.fillStyle(0x00ff00, 1);
+        this.playerGraphics.fillRect(player.x, player.y, 32, 32);
+      } else {
+        // Other players: blue
+        this.playerGraphics.fillStyle(0x0000ff, 1);
         this.playerGraphics.fillRect(player.x, player.y, 32, 32);
       }
     });
-    // Draw the local player last (on top)
-    const localPlayer = this.entityManager.getEntity(this.playerId);
-    if (localPlayer) {
-      this.playerGraphics.fillStyle(0xff0000, 1);
-      this.playerGraphics.fillRect(localPlayer.x, localPlayer.y, 32, 32);
-    }
   }
 } 

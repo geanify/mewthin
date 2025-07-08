@@ -6,6 +6,8 @@ export default class Player {
     this.x = x;
     this.y = y;
     this.stats = stats || {};
+    this.currentHealth = this.stats.currentHealth || this.stats.baseHP || 100;
+    this.range = this.stats.range || 1.5;
   }
 
   updatePosition(x, y) {
@@ -15,6 +17,8 @@ export default class Player {
 
   updateStats(stats) {
     this.stats = stats;
+    this.currentHealth = this.stats.currentHealth || this.stats.baseHP || 100;
+    this.range = this.stats.range || 1.5;
   }
 
   update(scene) {

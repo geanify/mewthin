@@ -12,6 +12,8 @@ export type PlayerStats = {
   baseDefense: number;
   baseMagicalDefense: number;
   baseMagicalAttack: number;
+  currentHealth: number;
+  range: number;
 };
 
 export const BASE_STATS: PlayerStats = {
@@ -28,4 +30,6 @@ export const BASE_STATS: PlayerStats = {
   baseDefense: 5,
   baseMagicalDefense: 5,
   baseMagicalAttack: 10,
+  currentHealth: 100,
+  range: 1.5,
 }; 
