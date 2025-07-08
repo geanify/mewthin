@@ -39,6 +39,9 @@ export default class MainScene extends Scene {
 
     // Add ClickToMove system
     this.clickToMove = new ClickToMove(this, () => this.entityManager.getEntity(this.playerId));
+
+    // Inventory UI
+    this.inventoryText = this.add.text(10, 10, '', { font: '16px Arial', fill: '#fff' });
   }
 
   update(time) {
@@ -59,6 +62,17 @@ export default class MainScene extends Scene {
     // Update click-to-move system
     if (this.clickToMove) {
       this.clickToMove.update();
+    }
+    // Update inventory UI
+    if (this.inventoryText && this.playerId) {
+      const player = this.entityManager.getEntity(this.playerId);
+      if (player && player.inventory) {
+        const items = player.inventory.getItems();
+        this.inventoryText.setText(
+          'Inventory:\n' +
+          items.map(item => `- ${item.name} (${item.slot})`).join('\n')
+        );
+      }
     }
   }
 
