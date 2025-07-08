@@ -1,13 +1,10 @@
 import { Scene } from 'phaser';
-import Player from './Player.js';
-import InputHandler from './InputHandler.js';
-import EntityManager from './EntityManager.js';
-import Enemy from './Enemy.js';
-import socket from './socket.js'
-import GameNetwork from './GameNetwork.js';
-import AttackSystem from './AttackSystem.js';
-import ClickToMove from './ClickToMove.js';
-import InventoryUI from './InventoryUI.js';
+import InputHandler from '../game/InputHandler.js';
+import EntityManager from '../game/EntityManager.js';
+import GameNetwork from '../game/GameNetwork.js';
+import AttackSystem from '../game/AttackSystem.js';
+import ClickToMove from '../game/ClickToMove.js';
+import InventoryUI from '../game/InventoryUI.js';
 
 
 export default class MainScene extends Scene {

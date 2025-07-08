@@ -1,5 +1,5 @@
 import { Game, AUTO } from 'phaser';
-import MainScene from './MainScene.js';
+import MainScene from './scenes/MainScene.js';
 
 const config = {
   type: AUTO,
