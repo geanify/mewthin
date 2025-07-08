@@ -39,8 +39,8 @@ export default class ClickToMove {
     if (typeof window !== 'undefined' && window.socket) {
       window.socket.emit('move', { x: player.x, y: player.y });
     }
-    if (this.scene.drawPlayers) {
-      this.scene.drawPlayers();
+    if (this.scene.drawEntities) {
+      this.scene.drawEntities();
     }
   }
 
