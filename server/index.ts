@@ -9,15 +9,28 @@ const io = new Server(undefined, {
     }
   }).listen(21234)
 
-// Player state: { [id]: { x, y, stats } }
+// Player and enemy state
 type PlayerState = { x: number, y: number, stats: PlayerStats };
-const players: Record<string, PlayerState> = {}
+type EnemyState = { id: string, x: number, y: number, stats: PlayerStats };
+const players: Record<string, PlayerState> = {};
+const enemies: Record<string, EnemyState> = {};
+
+// Spawn 5 enemies with placeholder stats
+for (let i = 0; i < 5; i++) {
+  const id = `enemy_${i}`;
+  enemies[id] = {
+    id,
+    x: 200 + i * 80,
+    y: 300 + (i % 2) * 60,
+    stats: { ...BASE_STATS }
+  };
+}
 
 io.on('connection', socket => {
   // Assign initial position and stats
   players[socket.id] = { x: 100, y: 100, stats: { ...BASE_STATS } }
-  // Send current state to the new player
-  socket.emit('currentPlayers', players)
+  // Send current state to the new player, including enemies
+  socket.emit('currentState', { players, enemies });
   // Notify others of the new player
   socket.broadcast.emit('playerJoined', { id: socket.id, x: 100, y: 100, stats: { ...BASE_STATS } })
 

@@ -1,10 +1,10 @@
 import { Scene } from 'phaser';
-import io from 'socket.io-client';
 import Player from './Player.js';
 import InputHandler from './InputHandler.js';
 import EntityManager from './EntityManager.js';
+import Enemy from './Enemy.js';
+import socket from './socket.js'
 
-const socket = io('http://localhost:3000');
 
 export default class MainScene extends Scene {
   constructor() {
@@ -20,16 +20,47 @@ export default class MainScene extends Scene {
     this.playerId = null;
     this.inputHandler = new InputHandler(this);
 
-    socket.on('currentPlayers', (players) => {
-      this.entityManager = new EntityManager();
-      Object.entries(players).forEach(([id, data]) => {
-        this.entityManager.addEntity(new Player(id, data.x, data.y, data.stats));
+    socket.on('currentState', ({ players, enemies }) => {
+      // Remove all non-enemy entities
+      this.entityManager.getAllEntities().forEach(entity => {
+        if (!entity.isEnemy) {
+          this.entityManager.removeEntity(entity.id);
+        }
       });
+
+      // Add or update players from the server
+      Object.entries(players).forEach(([id, data]) => {
+        let player = this.entityManager.getEntity(id);
+        if (player && !player.isEnemy) {
+          player.updatePosition(data.x, data.y);
+          player.updateStats(data.stats);
+        } else if (!player) {
+          this.entityManager.addEntity(new Player(id, data.x, data.y, data.stats));
+        }
+      });
+
+      // Add or update enemies from the server
+      Object.entries(enemies).forEach(([id, data]) => {
+        let enemy = this.entityManager.getEntity(id);
+        if (!enemy) {
+          this.entityManager.addEntity(new Enemy(id, data.x, data.y, data.stats));
+        } else {
+          enemy.x = data.x;
+          enemy.y = data.y;
+          enemy.stats = data.stats;
+        }
+      });
+
       this.playerId = socket.id;
+      if (typeof window !== 'undefined') {
+        window.playerId = this.playerId;
+      }
       this.drawPlayers();
       // Log stats for debugging
-      this.entityManager.getAllEntities().forEach((player) => {
-        console.log(`Player ${player.id} stats:`, player.stats);
+      this.entityManager.getAllEntities().forEach((entity) => {
+        if (!entity.isEnemy) {
+          console.log(`Player ${entity.id} stats:`, entity.stats);
+        }
       });
     });
 
