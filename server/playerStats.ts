@@ -21,7 +21,7 @@ export const BASE_STATS: PlayerStats = {
   strength: 10,
   intelligence: 10,
   dexterity: 10,
-  movementSpeed: 2,
+  movementSpeed: 1,
   attackSpeed: 3,
   castingSpeed: 1,
   baseHP: 100,
@@ -31,7 +31,7 @@ export const BASE_STATS: PlayerStats = {
   baseMagicalDefense: 5,
   baseMagicalAttack: 10,
   currentHealth: 100,
-  range: 1.5,
+  range: 4.5,
 };
 
 export const STONE_ENEMY_STATS: PlayerStats = {

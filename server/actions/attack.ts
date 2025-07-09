@@ -1,7 +1,7 @@
 import type { Server, Socket } from 'socket.io';
 import type { PlayerState, EnemyState } from '../types';
 import { handleStoneEnemySpawn } from './stone/handleStoneEnemy';
-import { ENEMY_SIZE, PLAYER_SIZE } from '../config';
+import { ENEMY_SIZE, PLAYER_SIZE, WORLD_WIDTH, WORLD_HEIGHT } from '../config';
 
 export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState>, players: Record<string, PlayerState> }, socket: Socket, io: Server) {
   const { id, damage } = payload;
@@ -31,7 +31,9 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
   }
 
   if (enemy.stats.currentHealth <= 0) {
-    enemy.x = Math.floor(Math.random() * (800 - 20));
+    // Respawn in meters, not pixels
+    enemy.x = Math.random() * (WORLD_WIDTH - ENEMY_SIZE);
+    enemy.y = Math.random() * (WORLD_HEIGHT - ENEMY_SIZE);
     enemy.stats.currentHealth = enemy.stats.baseHP || 100;
   }
   io.emit('entityUpdated', { id: enemy.id, x: enemy.x, y: enemy.y, stats: enemy.stats, isPlayer: false, isEnemy: true });

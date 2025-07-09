@@ -30,7 +30,8 @@ export default class Renderer {
       const depthB = this.getDepth(b, playerId);
       return depthA - depthB;
     });
-    console.log(sortedEntities)
+
+    
     sortedEntities.forEach((entity) => {
       // Determine size in meters
       let size = 2; // PLAYER_SIZE
