@@ -2,7 +2,7 @@ import type { Server } from 'socket.io';
 import type { PlayerState, EnemyState } from '../types';
 import { ENEMY_SIZE } from '../config';
 
-const AGGRO_RANGE = 200;
+const AGGRO_RANGE = 40;
 const ATTACK_COOLDOWN = 1000;
 
 function findNearestPlayer(enemy: EnemyState, players: Record<string, PlayerState>) {

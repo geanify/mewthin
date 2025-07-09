@@ -5,7 +5,7 @@ import { ENEMY_SIZE, PLAYER_SIZE, WORLD_WIDTH, WORLD_HEIGHT } from '../config';
 
 export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState>, players: Record<string, PlayerState> }, socket: Socket, io: Server) {
   const { id, damage } = payload;
-  const enemy = state.enemies[id] as EnemyState & { isStoneEnemy?: boolean, lastSplitPercent?: number };
+  const enemy = state.enemies[id] as EnemyState & { isStoneEnemy?: boolean, lastSplitPercent?: number, noRespawn?: boolean };
   const player = state.players[socket.id];
   if (!enemy || typeof enemy.stats.currentHealth !== 'number' || !player) return;
 
@@ -31,6 +31,11 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
   }
 
   if (enemy.stats.currentHealth <= 0) {
+    if (enemy.noRespawn) {
+      delete state.enemies[enemy.id];
+      io.emit('entityLeft', enemy.id);
+      return;
+    }
     // Respawn in meters, not pixels
     enemy.x = Math.random() * (WORLD_WIDTH - ENEMY_SIZE);
     enemy.y = Math.random() * (WORLD_HEIGHT - ENEMY_SIZE);
