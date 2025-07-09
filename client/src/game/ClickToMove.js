@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { metersToPixels, pixelsToMeters } from '../../../common/unitConversion';
 
 export default class ClickToMove {
   constructor(scene, getPlayer) {
@@ -11,7 +12,10 @@ export default class ClickToMove {
   }
 
   onPointerDown(pointer) {
-    this.target = { x: pointer.worldX, y: pointer.worldY };
+    // Convert pointer (pixel) coordinates to meters
+    const targetX = pixelsToMeters(pointer.worldX);
+    const targetY = pixelsToMeters(pointer.worldY, 100, 600);
+    this.target = { x: targetX, y: targetY };
     const player = this.getPlayer();
     if (player && player.stats && player.stats.movementSpeed) {
       this.speed = player.stats.movementSpeed;
@@ -23,10 +27,10 @@ export default class ClickToMove {
   update() {
     const player = this.getPlayer();
     if (!player || !this.target) return;
-    const dx = this.target.x - (player.x + 16);
-    const dy = this.target.y - (player.y + 16);
+    const dx = this.target.x - player.x;
+    const dy = this.target.y - player.y;
     const dist = Math.hypot(dx, dy);
-    if (dist < 2) {
+    if (dist < 0.05) { // 5cm threshold for arrival
       this.target = null;
       return;
     }
