@@ -47,8 +47,9 @@ function attackNearestPlayer(enemy: EnemyState, target: PlayerState, targetId: s
 function handleAggressiveEnemy(enemy: EnemyState, players: Record<string, PlayerState>, lastEnemyAttack: Record<string, number>, io: Server) {
   const { nearest, nearestId, minDist } = findNearestPlayer(enemy, players);
   if (nearest && nearestId && minDist <= AGGRO_RANGE) {
-    const attackRange = (enemy.stats.range || 1.5) * 32;
-    if (minDist > attackRange) {
+    const attackerRange = (enemy.stats.range || 1.5) * 32;
+    const defenderHitbox = 24;
+    if (minDist > attackerRange + defenderHitbox) {
       moveAggressiveEnemyTowards(enemy, nearest, io);
     } else {
       attackNearestPlayer(enemy, nearest, nearestId, lastEnemyAttack, io);
