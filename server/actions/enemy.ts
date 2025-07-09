@@ -10,8 +10,14 @@ function findNearestPlayer(enemy: EnemyState, players: Record<string, PlayerStat
   let nearest: PlayerState | null = null;
   let minDist = Infinity;
   Object.entries(players).forEach(([pid, player]) => {
-    const dx = (player.x + 16) - (enemy.x + 10);
-    const dy = (player.y + 16) - (enemy.y + 10);
+    const playerSize = 2; // PLAYER_SIZE
+    const enemySize = ENEMY_SIZE || 1.5;
+    const playerCenterX = player.x + playerSize / 2;
+    const playerCenterY = player.y + playerSize / 2;
+    const enemyCenterX = enemy.x + enemySize / 2;
+    const enemyCenterY = enemy.y + enemySize / 2;
+    const dx = playerCenterX - enemyCenterX;
+    const dy = playerCenterY - enemyCenterY;
     const dist = Math.hypot(dx, dy);
     if (dist < minDist) {
       minDist = dist;
@@ -24,10 +30,18 @@ function findNearestPlayer(enemy: EnemyState, players: Record<string, PlayerStat
 
 function moveAggressiveEnemyTowards(enemy: EnemyState, target: PlayerState, io: Server) {
   const speed = enemy.stats.movementSpeed || 2;
-  const dx = target.x - enemy.x;
-  const dy = target.y - enemy.y;
+  const enemySize = ENEMY_SIZE || 1.5;
+  const playerSize = 2; // PLAYER_SIZE
+  const playerCenterX = target.x + playerSize / 2;
+  const playerCenterY = target.y + playerSize / 2;
+  const enemyCenterX = enemy.x + enemySize / 2;
+  const enemyCenterY = enemy.y + enemySize / 2;
+  const dx = playerCenterX - enemyCenterX;
+  const dy = playerCenterY - enemyCenterY;
   const dist = Math.hypot(dx, dy);
-  if (dist > 1e-2) {
+  const attackerRange = enemy.stats.range || 1.5;
+  const defenderHitbox = ENEMY_SIZE * 0.8;
+  if (dist > attackerRange + defenderHitbox && dist > 1e-2) {
     const step = Math.min(speed, dist);
     enemy.x += (dx / dist) * step;
     enemy.y += (dy / dist) * step;
