@@ -14,11 +14,27 @@ export default class MainScene extends Scene {
     this.entityManager = new EntityManager();
     this.playerId = null;
     this.renderer = null;
+    this.map = null;
+    this.groundLayer = null;
   }
 
-  preload() {}
+  preload() {
+    // Load Tiled map and tileset
+    this.load.tilemapTiledJSON('map', 'maps/map.json');
+    this.load.image('tileset_legacy', 'tilesets/tileset_legacy.png');
+  }
 
   create() {
+    // Create the tilemap and layers
+    this.map = this.make.tilemap({ key: 'map' });
+    const tileset = this.map.addTilesetImage('tileset_legacy', 'tileset_legacy');
+    this.groundLayer = this.map.createLayer('Ground', tileset, 0, 0);
+    // Center the map in the game window
+    this.groundLayer.setPosition(
+      (this.sys.game.config.width - this.map.widthInPixels) / 2,
+      (this.sys.game.config.height - this.map.heightInPixels) / 2
+    );
+
     this.entityManager = new EntityManager();
     this.playerId = null;
     this.inputHandler = new InputHandler(this);
@@ -68,6 +84,10 @@ export default class MainScene extends Scene {
     // Update inventory UI
     if (this.inventoryUI) {
       this.inventoryUI.update();
+    }
+    // Always render entities every frame
+    if (this.renderer) {
+      this.renderer.render(this.playerId);
     }
   }
 } 
