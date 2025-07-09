@@ -1,7 +1,7 @@
 import type { Server, Socket } from 'socket.io';
 import type { PlayerState, EnemyState } from '../types';
 import { handleStoneEnemySpawn } from './stone/handleStoneEnemy';
-import { ENEMY_SIZE } from '../config';
+import { ENEMY_SIZE, PLAYER_SIZE } from '../config';
 
 export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState>, players: Record<string, PlayerState> }, socket: Socket, io: Server) {
   const { id, damage } = payload;
@@ -9,13 +9,18 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
   const player = state.players[socket.id];
   if (!enemy || typeof enemy.stats.currentHealth !== 'number' || !player) return;
 
-  // Range check
+  // Range check (center to center, bigger hitbox)
   const playerRange = player.stats?.range || 1.5;
+  const playerSize = PLAYER_SIZE || 2;
   const enemySize = ENEMY_SIZE || 1.5;
-  const dx = (player.x) - (enemy.x);
-  const dy = (player.y) - (enemy.y);
+  const playerCenterX = player.x + playerSize / 2;
+  const playerCenterY = player.y + playerSize / 2;
+  const enemyCenterX = enemy.x + enemySize / 2;
+  const enemyCenterY = enemy.y + enemySize / 2;
+  const dx = playerCenterX - enemyCenterX;
+  const dy = playerCenterY - enemyCenterY;
   const dist = Math.hypot(dx, dy);
-  if (dist > playerRange + enemySize * 0.5) return; // Not in range
+  if (dist > playerRange + enemySize) return; // Use full enemy size as hitbox radius
 
   const prevHealth = enemy.stats.currentHealth;
   enemy.stats.currentHealth = Math.max(0, enemy.stats.currentHealth - damage);

@@ -37,9 +37,13 @@ export default class AttackSystem {
     }
     this.attackCircle.clear();
     const range = player.stats?.range || 1.5;
-    // Use metersToPixels utility for conversion
-    const px = metersToPixels(player.x);
-    const py = metersToPixels(player.y, 100, 600); // Use height for y
+    const size = 2; // Player size in meters
+    // Center coordinates in meters
+    const centerX = player.x + size / 2;
+    const centerY = player.y + size / 2;
+    // Convert to pixels
+    const px = metersToPixels(centerX);
+    const py = metersToPixels(centerY, 100, 600);
     const radius = metersToPixels(range);
     this.attackCircle.lineStyle(2, 0xffff00, 0.5);
     this.attackCircle.strokeCircle(px, py, radius);
