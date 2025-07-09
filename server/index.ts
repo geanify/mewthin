@@ -5,6 +5,7 @@ import { BASE_STATS, STONE_ENEMY_STATS } from './playerStats'
 import { handleMoveAction } from './actions/movement'
 import { handleAttackAction } from './actions/attack'
 import { handleEnemyAI } from './actions/enemy'
+import { WORLD_WIDTH, WORLD_HEIGHT, PLAYER_SIZE, ENEMY_SIZE, STONE_ENEMY_SIZE } from './config'
 
 const io = new Server(undefined, {
     cors: {
@@ -24,33 +25,33 @@ const state = {
 
 // Spawn 4 regular enemies
 for (let i = 0; i < 4; i++) {
-  const id = `enemy_${i}`
+  const id = `enemy_${i}`;
   state.enemies[id] = {
     id,
-    x: 200 + i * 80,
-    y: 300 + (i % 2) * 60,
-    stats: { ...BASE_STATS }
-  }
+    x: 20 + i * (ENEMY_SIZE + 2), // space them out in meters
+    y: 30 + (i % 2) * (ENEMY_SIZE + 2),
+    stats: { ...BASE_STATS },
+    type: 'enemy',
+  };
 }
 // Spawn 5 AggressiveEnemies at random positions
 for (let i = 0; i < 5; i++) {
-  const id = `aggressive_enemy_${i}`
+  const id = `aggressive_enemy_${i}`;
   state.enemies[id] = {
     id,
-    x: Math.floor(Math.random() * 800),
-    y: Math.floor(Math.random() * 600),
+    x: Math.random() * (WORLD_WIDTH - ENEMY_SIZE),
+    y: Math.random() * (WORLD_HEIGHT - ENEMY_SIZE),
     stats: { ...BASE_STATS, baseHP: 150, currentHealth: 150 },
     type: 'aggressiveEnemy',
     isAggressiveEnemy: true
-  }
+  };
 }
-
 // Spawn 1 Stone Enemy
 const stoneId = 'stone_enemy_1';
 state.enemies[stoneId] = {
   id: stoneId,
-  x: 400,
-  y: 200,
+  x: WORLD_WIDTH / 2 - STONE_ENEMY_SIZE / 2,
+  y: WORLD_HEIGHT / 2 - STONE_ENEMY_SIZE / 2,
   stats: { ...STONE_ENEMY_STATS },
   type: 'stoneEnemy',
   isStoneEnemy: true,
@@ -59,11 +60,12 @@ state.enemies[stoneId] = {
 
 const TICK_RATE = 20
 setInterval(() => {
-  handleEnemyAI(state, io)
+  handleEnemyAI(state, io);
+  // preventCollisions(state); // Disabled for now
 }, 1000 / TICK_RATE)
 
 io.on('connection', socket => {
-  state.players[socket.id] = { x: 100, y: 100, stats: { ...BASE_STATS } }
+  state.players[socket.id] = { id: socket.id, x: 10, y: 10, stats: { ...BASE_STATS } };
 
   const buildEntities = () => {
     const entities: Record<string, any> = {}

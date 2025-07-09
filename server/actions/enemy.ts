@@ -1,5 +1,6 @@
 import type { Server } from 'socket.io';
 import type { PlayerState, EnemyState } from '../types';
+import { ENEMY_SIZE } from '../config';
 
 const AGGRO_RANGE = 200;
 const ATTACK_COOLDOWN = 1000;
@@ -47,8 +48,8 @@ function attackNearestPlayer(enemy: EnemyState, target: PlayerState, targetId: s
 function handleAggressiveEnemy(enemy: EnemyState, players: Record<string, PlayerState>, lastEnemyAttack: Record<string, number>, io: Server) {
   const { nearest, nearestId, minDist } = findNearestPlayer(enemy, players);
   if (nearest && nearestId && minDist <= AGGRO_RANGE) {
-    const attackerRange = (enemy.stats.range || 1.5) * 32;
-    const defenderHitbox = 24;
+    const attackerRange = enemy.stats.range || 1.5;
+    const defenderHitbox = ENEMY_SIZE * 0.8;
     if (minDist > attackerRange + defenderHitbox) {
       moveAggressiveEnemyTowards(enemy, nearest, io);
     } else {

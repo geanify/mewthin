@@ -1,3 +1,5 @@
+import { metersToPixels } from '../../../common/unitConversion';
+
 export default class AttackSystem {
   constructor(scene, entityManager, getPlayerId) {
     this.scene = scene;
@@ -35,9 +37,12 @@ export default class AttackSystem {
     }
     this.attackCircle.clear();
     const range = player.stats?.range || 1.5;
-    const radius = range * 32; // scale range to pixels
+    // Use metersToPixels utility for conversion
+    const px = metersToPixels(player.x);
+    const py = metersToPixels(player.y, 100, 600); // Use height for y
+    const radius = metersToPixels(range);
     this.attackCircle.lineStyle(2, 0xffff00, 0.5);
-    this.attackCircle.strokeCircle(player.x + 16, player.y + 16, radius);
+    this.attackCircle.strokeCircle(px, py, radius);
   }
 
   performAttack(player) {

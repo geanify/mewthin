@@ -1,5 +1,6 @@
 import type { Server, Socket } from 'socket.io';
 import type { PlayerState } from '../types';
+import { WORLD_WIDTH, WORLD_HEIGHT, PLAYER_SIZE } from '../config';
 
 function movePlayerByDirection(player: PlayerState, direction: any, speed: number): boolean {
   let dx = 0, dy = 0;
@@ -20,7 +21,7 @@ function movePlayerToTarget(player: PlayerState, target: any, speed: number): bo
   const dx = target.x - player.x;
   const dy = target.y - player.y;
   const dist = Math.hypot(dx, dy);
-  if (dist > 1) {
+  if (dist > 0.05) { // 5cm threshold for arrival
     const step = Math.min(speed, dist);
     player.x += (dx / dist) * step;
     player.y += (dy / dist) * step;
@@ -32,9 +33,9 @@ function movePlayerToTarget(player: PlayerState, target: any, speed: number): bo
   }
 }
 
-function clampPlayerToBounds(player: PlayerState, minX = 0, maxX = 800, minY = 0, maxY = 600) {
-  player.x = Math.max(minX, Math.min(maxX, player.x));
-  player.y = Math.max(minY, Math.min(maxY, player.y));
+function clampPlayerToBounds(player: PlayerState) {
+  player.x = Math.max(0, Math.min(WORLD_WIDTH - PLAYER_SIZE, player.x));
+  player.y = Math.max(0, Math.min(WORLD_HEIGHT - PLAYER_SIZE, player.y));
 }
 
 export function handleMoveAction(payload: any, state: { players: Record<string, PlayerState> }, socket: Socket, io: Server) {
