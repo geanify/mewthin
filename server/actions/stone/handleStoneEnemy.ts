@@ -1,6 +1,6 @@
 import type { Server } from 'socket.io';
 
-export function handleStoneEnemySplit(enemy: any, state: any, io: Server, attackerId: string) {
+export function handleStoneEnemySpawn(enemy: any, state: any, io: Server, attackerId: string) {
   const maxHP = enemy.stats.baseHP || 2000;
   const percent = Math.floor((enemy.stats.currentHealth / maxHP) * 100);
   if (percent <= (enemy.lastSplitPercent ?? 100) - 5) {

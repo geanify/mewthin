@@ -1,6 +1,6 @@
 import type { Server, Socket } from 'socket.io';
 import type { PlayerState, EnemyState } from '../types';
-import { handleStoneEnemySplit } from './stone/handleStoneEnemy';
+import { handleStoneEnemySpawn } from './stone/handleStoneEnemy';
 
 export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState> }, socket: Socket, io: Server) {
   const { id, damage } = payload;
@@ -11,7 +11,7 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
 
     // Stone Enemy special logic
     if (enemy.isStoneEnemy && typeof enemy.lastSplitPercent === 'number') {
-      handleStoneEnemySplit(enemy, state, io, socket.id);
+      handleStoneEnemySpawn(enemy, state, io, socket.id);
     }
 
     if (enemy.stats.currentHealth <= 0) {
@@ -20,4 +20,4 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
     }
     io.emit('entityUpdated', { id: enemy.id, x: enemy.x, y: enemy.y, stats: enemy.stats, isPlayer: false, isEnemy: true });
   }
-} 
+}
