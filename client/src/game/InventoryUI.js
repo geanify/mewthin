@@ -9,6 +9,7 @@ export default class InventoryUI {
     this.originX = scene.scale.width - (this.gridCols * this.cellSize) - this.margin;
     this.originY = scene.scale.height - (this.gridRows * this.cellSize) - this.margin;
     this.graphics = scene.add.graphics();
+    this.graphics.setDepth(100);
     this.texts = [];
   }
 
