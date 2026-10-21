@@ -49,7 +49,7 @@ export default class Renderer {
       // Draw entity rectangle
       if (entity.isEnemy) {
         if (entity.type === 'stoneEnemy' || entity.isStoneEnemy) {
-          this.graphics.fillStyle(0xffff00, 1);
+          this.graphics.fillStyle(0xffa500, 1);
         } else if (entity.type === 'aggressiveEnemy' || entity.isAggressiveEnemy) {
           this.graphics.fillStyle(0x800080, 1);
         } else {
@@ -74,6 +74,16 @@ export default class Renderer {
       this.graphics.fillRect(px, barY, barWidth, barHeight);
       this.graphics.fillStyle(0x00ff00, 1);
       this.graphics.fillRect(px, barY, barWidth * hpRatio, barHeight);
+
+      // Render loot entities
+      if (entity.type === 'loot') {
+        this.graphics.fillStyle(0xffff00, 1); // Yellow
+        const px = metersToPixels(entity.x);
+        const py = metersToPixels(entity.y, 100, 600);
+        const size = metersToPixels(0.5); // Small square
+        this.graphics.fillRect(px, py, size, size);
+        return; // Don't render HP bar, etc.
+      }
     });
   }
 } 

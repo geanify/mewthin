@@ -1,11 +1,12 @@
 import type { Server, Socket } from 'socket.io';
-import type { PlayerState, EnemyState } from '../types';
+import type { PlayerState, EnemyState, LootWorldEntity } from '../types';
 import { handleStoneEnemySpawn } from './stone/handleStoneEnemy';
 import { ENEMY_SIZE, PLAYER_SIZE, WORLD_WIDTH, WORLD_HEIGHT } from '../config';
+import { rollLoot } from './loot';
 
-export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState>, players: Record<string, PlayerState> }, socket: Socket, io: Server) {
+export function handleAttackAction(payload: any, state: { enemies: Record<string, EnemyState | LootWorldEntity>, players: Record<string, PlayerState> }, socket: Socket, io: Server) {
   const { id, damage } = payload;
-  const enemy = state.enemies[id] as EnemyState & { isStoneEnemy?: boolean, lastSplitPercent?: number, noRespawn?: boolean };
+  const enemy = state.enemies[id] as EnemyState & { isStoneEnemy?: boolean, lastSplitPercent?: number, noRespawn?: boolean, lootTable?: any };
   const player = state.players[socket.id];
   if (!enemy || typeof enemy.stats.currentHealth !== 'number' || !player) return;
 
@@ -31,6 +32,23 @@ export function handleAttackAction(payload: any, state: { enemies: Record<string
   }
 
   if (enemy.stats.currentHealth <= 0) {
+    // Roll for loot and spawn loot entities in the world
+    if (enemy.lootTable) {
+      const drops = rollLoot(enemy.lootTable);
+      for (const drop of drops) {
+        const lootId = `loot_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+        const lootEntity: LootWorldEntity = {
+          id: lootId,
+          x: enemy.x,
+          y: enemy.y,
+          type: 'loot',
+          itemId: drop.itemId,
+          quantity: drop.quantity,
+        };
+        state.enemies[lootId] = lootEntity;
+        io.emit('entityUpdated', lootEntity);
+      }
+    }
     if (enemy.noRespawn) {
       delete state.enemies[enemy.id];
       io.emit('entityLeft', enemy.id);

@@ -14,7 +14,7 @@ const io = new Server(undefined, {
   }).listen(21234)
 
 // Define PlayerState and EnemyState inline since types.ts does not exist
-type PlayerState = { x: number, y: number, stats: PlayerStats }
+type PlayerState = { id: string, x: number, y: number, stats: PlayerStats }
 type EnemyState = { id: string, x: number, y: number, stats: PlayerStats, type?: string, isAggressiveEnemy?: boolean, isStoneEnemy?: boolean, lastSplitPercent?: number }
 
 const state = {

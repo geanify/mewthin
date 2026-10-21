@@ -40,6 +40,10 @@ export default class GameNetwork {
             entity = new AggressiveEnemy(id, data.x, data.y, data.stats);
           } else if (data.isEnemy) {
             entity = new Enemy(id, data.x, data.y, data.stats);
+          } else if (data.type === 'loot') {
+            entity = { ...data }; // Store loot as plain object
+            this.entityManager.addEntity(entity);
+            return;
           } else {
             entity = new Entity(id, data.x, data.y, data.stats, null);
           }
@@ -73,6 +77,11 @@ export default class GameNetwork {
           entity = new AggressiveEnemy(data.id, data.x, data.y, data.stats);
         } else if (data.isEnemy) {
           entity = new Enemy(data.id, data.x, data.y, data.stats);
+        } else if (data.type === 'loot') {
+          entity = { ...data };
+          this.entityManager.addEntity(entity);
+          this.drawEntities();
+          return;
         } else {
           entity = new Entity(data.id, data.x, data.y, data.stats, null);
         }

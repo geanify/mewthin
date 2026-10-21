@@ -1,3 +1,12 @@
+export type LootEntry = {
+  itemId: string;
+  chance: number;
+  min?: number;
+  max?: number;
+};
+
+export type LootTable = LootEntry[];
+
 export type PlayerState = {
   id: string;
   x: number;
@@ -15,6 +24,8 @@ export type EnemyState = {
   isStoneEnemy?: boolean;
   lastSplitPercent?: number;
   targetId?: string;
+  noRespawn?: boolean;
+  lootTable?: LootTable;
 };
 
 export type Entity = {
@@ -30,4 +41,16 @@ export type Entity = {
   type?: string;
   isAggressiveEnemy?: boolean;
   isStoneEnemy?: boolean;
-}; 
+};
+
+export type LootWorldEntity = {
+  id: string;
+  x: number;
+  y: number;
+  type: 'loot';
+  itemId: string;
+  quantity: number;
+};
+
+// You may want to use this union for all world entities:
+// export type WorldEntity = PlayerState | EnemyState | LootWorldEntity; 
